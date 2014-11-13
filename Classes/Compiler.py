@@ -162,7 +162,7 @@ class Compiler:
         spec_path = "--specpath=%s/%s" % (self.build_dir, "specs")
         application_icon = "--icon=%s/%s" % (self.resources_dir, "icon.ico")
         # fixme When using the -w option, the final executable causes error
-        call(["pyinstaller.py", "--clean", "-y", "-F", spec_path, application_icon, "-n", "nightrain", "Application.py"],
+        call(["python.exe", "C:\\pyinstaller\\pyinstaller.py", "--clean", "-y", "-F", spec_path, application_icon, "-n", "nightrain", "Application.py"],
              shell=True)
         self.clean_unncessary_files()
 
