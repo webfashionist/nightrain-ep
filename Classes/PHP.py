@@ -62,7 +62,7 @@ class PHPServerThread (threading.Thread):
         self.webroot = webroot
 
     def start_server(self):
-        command = '{0} -S localhost:{1} -t {2}'.format(self.php_path, self.port, self.webroot)
+        command = '"{0}" -S localhost:{1} -t "{2}"'.format(self.php_path, self.port, self.webroot)
         if Compiler.is_linux() or Compiler.is_mac():
             self.php_server_process = subprocess.Popen(command, stdout=subprocess.PIPE, shell=True, preexec_fn=os.setsid)
         elif Compiler.is_windows():
