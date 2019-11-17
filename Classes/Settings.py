@@ -1,21 +1,20 @@
 __author__ = 'naetech'
 
-import Compiler
+import time
+from configparser import RawConfigParser
 
-from tempfile import mkstemp
-from shutil import move
 from os import remove, close
+from shutil import move
+from tempfile import mkstemp
 
-import ConfigParser, time, inspect, os
 
 class Settings:
-
     # an array to hold all the settings
     myConfig = None
 
     def load_settings(self, file):
         # if file found, populate the settings array and return true
-        config = ConfigParser.RawConfigParser()
+        config = RawConfigParser()
         if not config.read(file):
             return False
         else:
@@ -27,7 +26,7 @@ class Settings:
             return False
         else:
             value = self.myConfig.get("Application", key)
-            print "Value for %s is %s" % (key, value)
+            print("Value for %s is %s" % (key, value))
             if not value:
                 return False
             else:
@@ -36,20 +35,20 @@ class Settings:
     def pause_execution(self, seconds):
         time.sleep(seconds)
 
-    def create_default_settings(self, destination):
-        config = ConfigParser.RawConfigParser(allow_no_value=True)
+    def create_default_settings(self, destination, compiler):
+        config = RawConfigParser(allow_no_value=True)
 
         config.add_section("Application")
 
         config.set("Application", "; full path or the relative path to the PHP executable")
-        if Compiler.Compiler.is_linux() or Compiler.Compiler.is_mac():
+        if compiler.is_linux() or compiler.is_mac():
             config.set("Application", "php_path", "./lib/php/bin/php")
         else:
             config.set("Application", "php_path", "lib\\php\\php.exe")
 
         config.set("Application", "; full path or the relative path to the directory from where")
         config.set("Application", "; the server will load your PHP files")
-        if Compiler.Compiler.is_linux() or Compiler.Compiler.is_mac():
+        if compiler.is_linux() or compiler.is_mac():
             config.set("Application", "webroot", "./www")
         else:
             config.set("Application", "webroot", "www")
@@ -78,22 +77,22 @@ class Settings:
         config.set("Application", "; or the firewall on your computer is interfering")
         config.set("Application", "wait_time", 0)
 
-        with open(destination, 'wb') as config_file:
+        with open(destination, 'w') as config_file:
             config.write(config_file)
 
     @staticmethod
     def replace(file_path, pattern, subst):
-        #Create temp file
+        # Create temp file
         fh, abs_path = mkstemp()
-        new_file = open(abs_path,'w')
+        new_file = open(abs_path, 'w')
         old_file = open(file_path)
         for line in old_file:
             new_file.write(line.replace(pattern, subst))
-        #close temp file
+        # close temp file
         new_file.close()
         close(fh)
         old_file.close()
-        #Remove original file
+        # Remove original file
         remove(file_path)
-        #Move new file
+        # Move new file
         move(abs_path, file_path)

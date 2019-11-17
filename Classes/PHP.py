@@ -6,12 +6,10 @@ import re
 import threading
 import signal
 
-from Compiler import Compiler
+from .Compiler import Compiler
 
-from threading import Thread
 
 class PHP:
-
     program_php_server_thread = None
 
     def found(self, php_path):
@@ -20,18 +18,20 @@ class PHP:
             return False
 
         # attempt to execute php by shell -v
-        process_output = subprocess.check_output([php_path, "-v"])
+        process_output = str(subprocess.check_output([php_path, "-v"]))
 
         # check if the output contains zend anywhere
-        if "Zend Engine" in process_output:
+        if str("Zend Engine") in process_output:
             return True
         else:
             return False
 
+    def get_version(self, php_path):
+        return subprocess.check_output([php_path, "-v"])
+
     def valid(self, php_path):
-        process_output = subprocess.check_output([php_path, "-v"])
-        matcher = re.compile("PHP 5.[0-9]+.[0-9]+")
-        if matcher.match(process_output):
+        matcher = re.compile(b"PHP [0-9]+.[0-9]+.[0-9]+")
+        if matcher.match(self.get_version(php_path)):
             return True
         else:
             return False
@@ -41,14 +41,14 @@ class PHP:
         self.program_php_server_thread.start()
 
     def stop_server_in_a_thread(self):
-        print "Trying to close the PHP process on %s" % (self.program_php_server_thread.php_server_process.pid)
+        print("Trying to close the PHP process on %s" % self.program_php_server_thread.php_server_process.pid)
         if Compiler.is_linux() or Compiler.is_mac():
             os.killpg(self.program_php_server_thread.php_server_process.pid, signal.SIGTERM)
         else:
             os.system('taskkill /f /im php.exe')
 
-class PHPServerThread (threading.Thread):
 
+class PHPServerThread(threading.Thread):
     php_path = None
     port = None
     webroot = None
@@ -64,7 +64,8 @@ class PHPServerThread (threading.Thread):
     def start_server(self):
         command = '{0} -S localhost:{1} -t {2}'.format(self.php_path, self.port, self.webroot)
         if Compiler.is_linux() or Compiler.is_mac():
-            self.php_server_process = subprocess.Popen(command, stdout=subprocess.PIPE, shell=True, preexec_fn=os.setsid)
+            self.php_server_process = subprocess.Popen(command, stdout=subprocess.PIPE, shell=True,
+                                                       preexec_fn=os.setsid)
         elif Compiler.is_windows():
             self.php_server_process = subprocess.Popen(command, stdout=subprocess.PIPE, shell=True)
 
